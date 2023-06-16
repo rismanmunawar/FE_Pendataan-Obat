@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UAS-FrontEnd-MI21A</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <h2>PENDATAAN OBAT-OBATAN</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="inputNamaObat">Nama Obat</label>
+            <input
+              id="nama_obat"
+              name="nama_obat"
+              type="text"
+              class="form-control"
+              id="inputNamaObat"
+              placeholder="Nama Obat"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="inputJenisObat">Jenis Obat</label>
+            <input
+              id="jenis_obat"
+              name="jenis_obat"
+              type="text"
+              class="form-control"
+              id="inputJenisObat"
+              placeholder="Jenis Obat"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="inputProdusen">Produsen</label>
+            <input
+              id="produsen"
+              name="produsen"
+              type="text"
+              class="form-control"
+              id="inputProdusen"
+              placeholder="Produsen"
+              required
+            />
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="inputStok">Stok</label>
+            <input
+              id="stok"
+              name="stok"
+              type="number"
+              class="form-control"
+              id="inputStok"
+              placeholder="Stok"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="inputHarga">Harga</label>
+            <input
+              id="harga"
+              name="harga"
+              type="number"
+              class="form-control"
+              id="inputHarga"
+              placeholder="Harga"
+              required
+            />
+          </div>
+          <div class="form-group" style="margin-top: 12%">
+            <button
+              id="button"
+              onclick="saveData()"
+              type="button"
+              class="btn btn-success"
+            >
+              <i class="fas fa-plus"></i> Tambah Obat
+            </button>
+          </div>
+        </div>
+      </div>
+      <table class="table mt-4">
+        <thead>
+          <tr>
+            <th scope="col">No</th>
+            <th scope="col">Nama Obat</th>
+            <th scope="col">Jenis Obat</th>
+            <th scope="col">Produsen</th>
+            <th scope="col">Harga</th>
+            <th scope="col">Stok</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody id="result"></tbody>
+      </table>
+    </div>
+    <footer>
+      <marquee behavior="scroll" direction="left">
+        <p>
+          &copy;Pendataan Obat Obatan - UAS MI21A - Front End - Dede Munawar
+          Risman
+        </p>
+      </marquee>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      const getData = async () => {
+        axios
+          .get(`http://103.163.110.11:3031/medicines`)
+          .then((response) => {
+            let bucket = ``;
+            let medicines = response.data;
+            if (medicines && medicines.length > 0) {
+              for (let i = 0; i < medicines.length; i++) {
+                bucket += `
+            <tr>
+              <td>${i + 1}</td>
+              <td>${medicines[i].nama_obat}</td>
+              <td>${medicines[i].jenis_obat}</td>
+              <td>${medicines[i].produsen}</td>
+              <td>${medicines[i].harga}</td>
+              <td>${medicines[i].stok}</td>
+              <td>
+                <button onclick="editData('${medicines[i].id}', '${
+                  medicines[i].nama_obat
+                }', '${medicines[i].jenis_obat}', '${
+                  medicines[i].produsen
+                }', '${medicines[i].harga}', '${medicines[i].stok}')">
+                  <i class="fas fa-edit"></i> Edit
+                </button>
+
+                <button onclick="deleteData(${medicines[i].id})">
+                  <i class="fas fa-trash"></i> Delete
+                </button>
+              </td>
+            </tr>`;
+              }
+            } else {
+              bucket += `
+          <tr>
+            <td colspan="7" style="text-align: center">Data Tidak Ditemukan</td>
+          </tr>`;
+            }
+            document.getElementById("result").innerHTML = bucket;
+          })
+          .catch((error) => {
+            let bucket = `
+          <tr>
+            <td colspan="7" style="text-align: center">${error.message}</td>
+          </tr>`;
+            document.getElementById("result").innerHTML = bucket;
+          });
+      };
+
+      const saveData = async () => {
+        let nama_obat = document.getElementById("nama_obat").value;
+        let jenis_obat = document.getElementById("jenis_obat").value;
+        let produsen = document.getElementById("produsen").value;
+        let harga = document.getElementById("harga").value;
+        let stok = document.getElementById("stok").value;
+
+        if (nama_obat && jenis_obat && produsen && harga && stok) {
+          await axios
+            .post(`http://103.163.110.11:3031/medicines`, {
+              nama_obat: nama_obat,
+              jenis_obat: jenis_obat,
+              produsen: produsen,
+              harga: harga,
+              stok: stok,
+            })
+            .then((response) => {
+              getData();
+              document.getElementById("nama_obat").value = "";
+              document.getElementById("jenis_obat").value = "";
+              document.getElementById("produsen").value = "";
+              document.getElementById("harga").value = "";
+              document.getElementById("stok").value = "";
+              alert("Sukses Disimpan");
+              console.log(response);
+            })
+            .catch((error) => {
+              console.log(error.message);
+            });
+        } else {
+          alert("Mohon isi semua field sebelum menyimpan data");
+        }
+      };
+
+      const deleteData = async (id) => {
+        await axios
+          .delete(`http://103.163.110.11:3031/medicines/${id}`)
+          .then((response) => {
+            getData();
+            alert("Succes delete");
+            console.log(response);
+          })
+          .catch((error) => {
+            console.log(error.message);
+          });
+      };
+
+      const editData = (id, nama_obat, jenis_obat, produsen, harga, stok) => {
+        document.getElementById("nama_obat").value = nama_obat;
+        document.getElementById("jenis_obat").value = jenis_obat;
+        document.getElementById("produsen").value = produsen;
+        document.getElementById("harga").value = harga;
+        document.getElementById("stok").value = stok;
+        document.getElementById("button").innerText = "Ubah";
+        document
+          .getElementById("button")
+          .setAttribute("onclick", `updateData(${id})`);
+      };
+
+      const updateData = async (id) => {
+        let nama_obat = document.getElementById("nama_obat").value;
+        let jenis_obat = document.getElementById("jenis_obat").value;
+        let produsen = document.getElementById("produsen").value;
+        let harga = document.getElementById("harga").value;
+        let stok = document.getElementById("stok").value;
+
+        if (nama_obat && jenis_obat && produsen && harga && stok) {
+          await axios
+            .patch(`http://103.163.110.11:3031/medicines/${id}`, {
+              nama_obat: nama_obat,
+              jenis_obat: jenis_obat,
+              produsen: produsen,
+              harga: harga,
+              stok: stok,
+            })
+            .then((response) => {
+              getData();
+              document.getElementById("nama_obat").value = "";
+              document.getElementById("jenis_obat").value = "";
+              document.getElementById("produsen").value = "";
+              document.getElementById("harga").value = "";
+              document.getElementById("stok").value = "";
+              document.getElementById("button").innerText = "Tambah Obat";
+              document
+                .getElementById("button")
+                .setAttribute("onclick", "saveData()");
+              alert("Sukses DiEdit");
+              console.log(response);
+            })
+            .catch((error) => {
+              console.log(error.message);
+            });
+        } else {
+          alert("Mohon isi semua field sebelum mengubah data");
+        }
+      };
+
+      getData();
+    </script>
+  </body>
+</html>
